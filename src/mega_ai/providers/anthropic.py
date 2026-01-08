@@ -1,6 +1,5 @@
 """Anthropic (Claude) provider implementation."""
 
-import json
 from typing import Any
 
 from anthropic import Anthropic
@@ -12,8 +11,8 @@ class AnthropicProvider(BaseProvider):
     """Anthropic Claude API provider."""
 
     DEFAULT_MODELS = {
-        "orchestrator": "claude-opus-4-20250514",
-        "worker": "claude-sonnet-4-20250514",
+        "orchestrator": "claude-opus-4-5-20251101",
+        "worker": "claude-sonnet-4-5-20250929",
     }
 
     def __init__(

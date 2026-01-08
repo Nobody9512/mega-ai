@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -24,8 +23,8 @@ class ProvidersConfig(BaseModel):
 class ModelsConfig(BaseModel):
     """Model configurations."""
 
-    orchestrator: str = "claude-opus-4-20250514"
-    worker: str = "claude-sonnet-4-20250514"
+    orchestrator: str = "claude-opus-4-5-20251101"
+    worker: str = "claude-sonnet-4-5-20250929"
     default_provider: str = "anthropic"
 
 

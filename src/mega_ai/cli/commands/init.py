@@ -19,12 +19,12 @@ console = Console()
 
 ANTHROPIC_MODELS = {
     "orchestrator": [
-        ("claude-opus-4-20250514", "claude-opus-4-20250514 (recommended)"),
-        ("claude-sonnet-4-20250514", "claude-sonnet-4-20250514"),
+        ("claude-opus-4-5-20251101", "claude-opus-4-5-20251101 (recommended)"),
+        ("claude-sonnet-4-5-20250929", "claude-sonnet-4-5-20250929"),
     ],
     "worker": [
-        ("claude-sonnet-4-20250514", "claude-sonnet-4-20250514 (recommended)"),
-        ("claude-haiku-3-5-20241022", "claude-haiku-3-5-20241022 (faster, cheaper)"),
+        ("claude-sonnet-4-5-20250929", "claude-sonnet-4-5-20250929 (recommended)"),
+        ("claude-haiku-4-5-20251001", "claude-haiku-4-5-20251001 (faster, cheaper)"),
     ],
 }
 

@@ -47,8 +47,33 @@ def run(
     task: str = typer.Argument(..., help="Task description for the AI to execute"),
 ) -> None:
     """Run Orchestrator AI to analyze and generate transformation scripts."""
-    console.print(f"[bold]Task:[/bold] {task}")
-    console.print("[yellow]Not implemented yet[/yellow]")
+    from pathlib import Path
+
+    from mega_ai.orchestrator import Orchestrator, OrchestratorError
+    from mega_ai.utils.config import get_provider, load_config
+
+    try:
+        # Load config and get provider
+        config = load_config()
+        provider = get_provider(config)
+
+        # Create orchestrator and run
+        orchestrator = Orchestrator(provider=provider, console=console)
+        orchestrator.run(task_description=task, project_path=Path.cwd())
+
+    except ValueError as e:
+        # Configuration errors
+        console.print(f"[red]Configuration error:[/red] {e}")
+        console.print("Run [cyan]mega-ai init[/cyan] to configure.")
+        raise typer.Exit(1) from None
+
+    except OrchestratorError as e:
+        console.print(f"[red]Orchestrator error:[/red] {e}")
+        raise typer.Exit(1) from None
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Interrupted by user[/yellow]")
+        raise typer.Exit(130) from None
 
 
 @app.command()
