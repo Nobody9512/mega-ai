@@ -6,8 +6,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
-downloads/
+dist/ downloads/
 eggs/
 .eggs/
 lib/
@@ -50,3 +49,5 @@ htmlcov/
 # Local config
 .env
 .env.local
+
+.mega-ai
