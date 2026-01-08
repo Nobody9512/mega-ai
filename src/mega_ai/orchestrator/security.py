@@ -59,8 +59,8 @@ BLOCKED_SQL_KEYWORDS = {
 
 # Patterns that indicate dangerous operations
 DANGEROUS_PATTERNS = [
-    r">\s*\S+",  # Output redirection: > file
-    r">>\s*\S+",  # Append redirection: >> file
+    r"(?<![0-9])>(?!>)\s*(?!/dev/null)\S+",  # Output redirection, /dev/null allowed
+    r">>\s*(?!/dev/null)\S+",  # Append redirection, /dev/null allowed
     r"\|\s*tee\b",  # Pipe to tee
     r";\s*rm\b",  # Chained rm command
     r"&&\s*rm\b",  # Chained rm command
