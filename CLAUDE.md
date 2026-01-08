@@ -11,6 +11,9 @@ MEGA-AI is an AI-powered data transformation tool that automates repetitive inte
 
 ## Build & Development Commands
 
+# before run python code use this command
+source .venv/bin/activate
+
 ```bash
 # Install dependencies
 pip install -e ".[dev]"
