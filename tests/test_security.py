@@ -53,6 +53,22 @@ class TestDangerousRedirection:
         assert not result.is_safe
 
 
+class TestArrowOperator:
+    """Test PHP/JS arrow operator -> is not blocked."""
+
+    def test_php_artisan_tinker_with_arrow(self):
+        """PHP artisan tinker with arrow operator should be allowed."""
+        cmd = 'php artisan tinker --execute="echo \\DB::table(\'ec_products\')->count();"'
+        result = validate_command(cmd)
+        assert result.is_safe, f"Should be safe: {result.reason}"
+
+    def test_php_method_chaining(self):
+        """PHP method chaining with -> should be allowed."""
+        cmd = "php -r \"echo (new DateTime())->format('Y-m-d');\""
+        result = validate_command(cmd)
+        assert result.is_safe, f"Should be safe: {result.reason}"
+
+
 class TestSafeCommands:
     """Test that safe commands are allowed."""
 
