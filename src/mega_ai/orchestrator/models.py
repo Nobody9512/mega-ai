@@ -10,11 +10,18 @@ from pydantic import BaseModel, Field
 class TaskStatus(str, Enum):
     """Status of an orchestrator task."""
 
+    # Orchestrator statuses
     PENDING = "pending"
     ANALYZING = "analyzing"
     GENERATING = "generating"
     READY = "ready"
     FAILED = "failed"
+
+    # Worker statuses
+    BACKING_UP = "backing_up"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    ROLLED_BACK = "rolled_back"
 
 
 class ProjectInfo(BaseModel):

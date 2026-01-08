@@ -79,27 +79,103 @@ def run(
 @app.command()
 def worker(
     uuid: str = typer.Argument(..., help="Task UUID to execute"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview changes without executing"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", "-n", help="Preview changes without executing"
+    ),
 ) -> None:
     """Execute Worker AI for a specific task."""
-    console.print(f"[bold]Task UUID:[/bold] {uuid}")
-    console.print(f"[bold]Dry run:[/bold] {dry_run}")
-    console.print("[yellow]Not implemented yet[/yellow]")
+    from pathlib import Path
+
+    from mega_ai.worker import Worker, WorkerError
+
+    try:
+        w = Worker(project_path=Path.cwd(), console=console)
+        w.execute(task_uuid=uuid, dry_run=dry_run)
+
+    except WorkerError as e:
+        console.print(f"[red]Worker error:[/red] {e}")
+        raise typer.Exit(1) from None
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Interrupted by user[/yellow]")
+        raise typer.Exit(130) from None
 
 
 @app.command()
 def rollback(
     uuid: str = typer.Argument(..., help="Task UUID to rollback"),
+    backup_file: str = typer.Option(
+        None, "--file", "-f", help="Specific backup file to restore"
+    ),
 ) -> None:
     """Rollback changes for a specific task."""
-    console.print(f"[bold]Rolling back:[/bold] {uuid}")
-    console.print("[yellow]Not implemented yet[/yellow]")
+    from pathlib import Path
+
+    from mega_ai.worker import RollbackError, Worker
+
+    try:
+        w = Worker(project_path=Path.cwd(), console=console)
+        w.rollback(task_uuid=uuid, backup_file=backup_file)
+
+    except RollbackError as e:
+        console.print(f"[red]Rollback error:[/red] {e}")
+        raise typer.Exit(1) from None
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Interrupted by user[/yellow]")
+        raise typer.Exit(130) from None
 
 
 @app.command()
 def history() -> None:
     """Show task history."""
-    console.print("[yellow]Not implemented yet[/yellow]")
+    from pathlib import Path
+
+    from rich.table import Table
+
+    from mega_ai.orchestrator.task_manager import list_tasks
+
+    tasks = list_tasks(Path.cwd())
+
+    if not tasks:
+        console.print("[dim]No tasks found. Run 'mega-ai run' to create a task.[/dim]")
+        return
+
+    # Create table
+    table = Table(title="Task History", show_header=True, header_style="bold")
+    table.add_column("UUID", style="cyan")
+    table.add_column("Status")
+    table.add_column("Description", max_width=50)
+    table.add_column("Created")
+
+    # Status color mapping
+    status_colors = {
+        "pending": "dim",
+        "analyzing": "yellow",
+        "generating": "yellow",
+        "ready": "green",
+        "backing_up": "blue",
+        "executing": "blue",
+        "completed": "bold green",
+        "failed": "red",
+        "rolled_back": "yellow",
+    }
+
+    for task in tasks:
+        color = status_colors.get(task.status.value, "white")
+        status_text = f"[{color}]{task.status.value}[/{color}]"
+
+        # Format date
+        created = task.created_at.strftime("%Y-%m-%d %H:%M")
+
+        # Truncate description
+        desc = task.description
+        if len(desc) > 47:
+            desc = desc[:47] + "..."
+
+        table.add_row(task.uuid, status_text, desc, created)
+
+    console.print(table)
 
 
 if __name__ == "__main__":
