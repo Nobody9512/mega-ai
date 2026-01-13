@@ -28,7 +28,8 @@ IMPORTANT: Only read-only commands are allowed. Destructive commands will be blo
 Write generated scripts to the task folder. Valid paths:
 - `backup.py` - Backup and restore script
 - `runner.py` - Main transformation script with Worker AI integration
-- `config.json` - Task metadata (auto-generated, but you can add fields)
+
+NOTE: config.json is auto-managed by the system. Do NOT write config.json.
 
 ### ask_user
 Ask for clarification when:
@@ -73,19 +74,60 @@ Provide a summary of what was analyzed and generated.
 
 ### runner.py
 - Must have `run(dry_run=False)` function
-- Integrate with Worker AI using the configured model
+- **IMPORTANT**: Use the WorkerAI helper for AI calls (see below)
 - Include dynamic batching based on data size
 - Proper error handling with continue-on-error for non-critical failures
 - Progress tracking with rich console output
 - Create `WORKER_SYSTEM_PROMPT` specific to the transformation task
 
-### config.json
-Include:
-- uuid, created_at, description, status
-- project info (path, framework, version)
-- database info (type, host, name)
-- target info (table, column, primary_key, rows_count)
-- execution config (batch_strategy, estimated_time)
+**DRY RUN MODE REQUIREMENTS:**
+When `dry_run=True`:
+- Process ONLY first 10-20 records (not all records!)
+- Show a preview table with "Before" and "After" columns
+- Do NOT make any database changes
+- Display summary: "Showing 10 of X total records. Run without --dry-run to process all."
+
+Example dry-run output:
+```
+DRY RUN - Preview (first 10 of 4248 records):
+┌────┬─────────────────────────┬─────────────────────────┐
+│ ID │ Before                  │ After                   │
+├────┼─────────────────────────┼─────────────────────────┤
+│ 1  │ PRODUCT NAME HERE       │ Product Name Here       │
+│ 2  │ another product         │ Another Product         │
+└────┴─────────────────────────┴─────────────────────────┘
+```
+
+## WorkerAI Helper Usage
+
+For AI calls in runner.py, you MUST use the WorkerAI helper from mega_ai.worker.
+This automatically loads API keys from the user's config.
+
+```python
+from mega_ai.worker import WorkerAI
+
+# Initialize once
+ai = WorkerAI()
+
+# Single text transformation
+result = ai.transform(WORKER_SYSTEM_PROMPT, text)
+
+# Batch transformation (more efficient for multiple items)
+results = ai.batch_transform(WORKER_SYSTEM_PROMPT, texts_list, batch_size=20)
+
+# General chat (for custom interactions)
+response = ai.chat(
+    messages=[{"role": "user", "content": "Hello"}],
+    system_prompt="You are a helpful assistant"
+)
+```
+
+DO NOT use anthropic.Anthropic() or openai.OpenAI() directly in runner.py.
+The WorkerAI helper handles all provider configuration automatically.
+
+### config.json (DO NOT WRITE)
+config.json is automatically managed by the system. Do NOT write this file.
+Focus only on backup.py and runner.py.
 
 ## Important Rules
 
@@ -95,6 +137,20 @@ Include:
 4. Include proper type hints in generated Python code
 5. Use the existing database credentials from project configs
 6. Assume Python 3.10+ features are available
+
+## CRITICAL: Tool Usage Instructions
+
+**You MUST use proper tool calls for all actions.** Do NOT write "[Called tool_name]" in your text response - this does NOT execute the tool.
+
+When you need to write a file:
+- Use the write_file tool with proper tool_use format
+- Wait for the tool result before proceeding
+- Do NOT simulate tool calls in text
+
+When writing multiple files (backup.py, runner.py, config.json):
+- Call write_file tool separately for EACH file
+- Wait for confirmation that each file was written successfully
+- Only call complete_task after ALL files are confirmed written
 
 ## Response Format
 

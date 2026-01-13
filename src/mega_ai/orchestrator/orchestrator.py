@@ -165,8 +165,23 @@ class Orchestrator:
                             Message(role="assistant", content=response.content)
                         )
 
+                    # Check if AI wrote "[Called tool]" in text instead of actual tool call
+                    if response.content and "[Called " in response.content:
+                        self.console.print(
+                            "[yellow]AI simulated tool call in text. Prompting to use actual tool...[/yellow]"
+                        )
+                        messages.append(
+                            Message(
+                                role="user",
+                                content=(
+                                    "You wrote '[Called ...]' in your text response, but this does NOT execute the tool. "
+                                    "You MUST use the actual tool_use format to call tools. "
+                                    "Please call the write_file tool properly to write the file."
+                                ),
+                            )
+                        )
                     # Check stop reason
-                    if response.stop_reason in ("end_turn", "stop"):
+                    elif response.stop_reason in ("end_turn", "stop"):
                         # AI finished without calling complete_task
                         self.console.print(
                             "[yellow]AI finished without calling complete_task. Prompting...[/yellow]"

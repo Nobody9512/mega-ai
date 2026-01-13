@@ -206,6 +206,13 @@ class ToolHandler:
         # Sanitize path - only allow filename, no subdirectories for security
         clean_path = Path(actual_path).name
 
+        # Block config.json - it's managed by the orchestrator
+        if clean_path == "config.json":
+            return ToolResult(
+                success=True,
+                output="config.json is auto-managed. Skipped. Continue with other files.",
+            )
+
         # Only allow specific file extensions
         if not any(clean_path.endswith(ext) for ext in self.ALLOWED_EXTENSIONS):
             return ToolResult(
